@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "demo-reactor",
+  "provenance": "mechanistic",
+  "faults": [
+    {
+      "fault_id": "super_temperature",
+      "name": "反应器入口超温",
+      "category": "process",
+      "targetable_tags": ["TI-203"],
+      "model": "thermal_runaway_ramp",
+      "defaults": {
+        "magnitude": { "value": 210.0, "unit": "degC" },
+        "max_rate": { "value": 0.8, "unit": "degC/s" }
+      },
+      "physical_requirements": ["温度按热惯性上升，不得阶跃", "变化速率不超过 max_rate", "SIS 使用独立真实温度触发"],
+      "mechanism_basis": "演示假设：加热失控导致入口温度以受限速率上升。TODO(mechanism)"
+    },
+    {
+      "fault_id": "over_pressure",
+      "name": "反应器超压",
+      "category": "process",
+      "targetable_tags": ["PI-203"],
+      "model": "pressure_buildup_ramp",
+      "defaults": {
+        "magnitude": { "value": 2.1, "unit": "MPa" },
+        "max_rate": { "value": 0.004, "unit": "MPa/s" }
+      },
+      "physical_requirements": ["压力按自身时间常数爬升，不得与温度同相跳变", "爬升速率不超过 max_rate", "SIS 使用独立真实压力触发"],
+      "mechanism_basis": "演示假设：下游受阻导致压力缓慢累积。TODO(mechanism)"
+    },
+    {
+      "fault_id": "sensor_drift",
+      "name": "温度变送器漂移",
+      "category": "instrument",
+      "targetable_tags": ["TI-203", "PI-203", "FI-201", "LV-201"],
+      "model": "measured_signal_drift",
+      "defaults": {
+        "magnitude": { "value": 18.0, "unit": "degC" },
+        "rate": { "value": 0.06, "unit": "degC/s" }
+      },
+      "physical_requirements": ["真实过程值保持稳定", "测量值单向偏移并单调累积", "不得改变真实状态或联锁输入"],
+      "mechanism_basis": "演示假设：变送器零点缓慢漂移。TODO(mechanism)"
+    },
+    {
+      "fault_id": "valve_sticking",
+      "name": "进料调节阀卡涩",
+      "category": "actuator",
+      "targetable_tags": ["LV-201"],
+      "model": "actuator_stiction",
+      "defaults": {
+        "flow_step": { "value": 26.0, "unit": "t/h" }
+      },
+      "physical_requirements": ["指令改变而阀位反馈不跟随", "阀位与流量按同一映射响应", "残差持续存在并超过噪声带"],
+      "mechanism_basis": "演示假设：负荷需求变化时阀杆卡涩，阀位保持不跟随。TODO(mechanism)"
+    },
+    {
+      "fault_id": "sensor_disconnect",
+      "name": "进料流量信号断线",
+      "category": "instrument",
+      "targetable_tags": ["FI-201", "TI-203", "PI-203"],
+      "model": "signal_loss_with_quality",
+      "defaults": {},
+      "physical_requirements": ["质量位置 BAD，保留最后有效值并冻结", "不得将测量值置零冒充断线", "真实过程继续演化"],
+      "mechanism_basis": "演示假设：信号线断路，DCS 质量位报坏。TODO(mechanism)"
+    },
+    {
+      "fault_id": "network_jitter",
+      "name": "数据链路抖动与乱序",
+      "category": "network",
+      "targetable_tags": ["TI-203", "PI-203", "FI-201", "LV-201"],
+      "model": "network_delay_drop_reorder",
+      "defaults": {
+        "delay": { "value": 18.0, "unit": "s" },
+        "drop_rate": { "value": 35.0, "unit": "%" },
+        "reorder_rate": { "value": 20.0, "unit": "%" }
+      },
+      "physical_requirements": ["真实过程不受影响", "时间戳连续性和到达顺序被破坏", "丢包与延迟可被平台回放复核"],
+      "mechanism_basis": "演示假设：现场网络拥塞导致到达延迟、丢包与乱序。TODO(mechanism)"
+    }
+  ]
+}

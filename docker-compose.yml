@@ -1,0 +1,21 @@
+services:
+  iatp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iatp:0.1.0
+    ports:
+      - "8000:8000"
+    environment:
+      IATP_DATA_DIR: /app/data
+      IATP_ARTIFACT_DIR: /app/artifacts
+      IATP_AUTO_SEED: "true"
+      IATP_REPRODUCIBILITY_CHECK: "true"
+    volumes:
+      - iatp-data:/app/data
+      - iatp-artifacts:/app/artifacts
+    restart: unless-stopped
+
+volumes:
+  iatp-data:
+  iatp-artifacts:

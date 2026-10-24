@@ -1,0 +1,75 @@
+# 被测 Agent 目录。mock_* 是平台自带的确定性对照夹具，不是真实产品。
+# 接入真实 Agent 时复制 http-json-template 并填写 endpoint / token_env。
+agents:
+  - id: mock-reference
+    name: 基准诊断 Agent（确定性夹具）
+    version: "0.1.0"
+    description: 可检出六类标准故障、在数据不可用时明确降级；作为回归基线，不代表真实产品水平。
+    adapter: mock
+    mock_profile: reference
+    temperature: 0.0
+    timeout_s: 10.0
+    permissions:
+      allowed_tags: [TI-203, PI-203, FI-201]
+      high_risk_tags: [TI-203, PI-203]
+      allowed_control_kinds:
+        - set_setpoint
+        - request_maintenance
+        - request_manual_takeover
+    change_notes:
+      - 初始对照夹具，覆盖六类故障与降级路径。
+
+  - id: mock-degraded
+    name: 退化诊断 Agent（确定性夹具）
+    version: "0.1.0"
+    description: 刻意对仪表漂移与网络抖动失明，用于演示漏报优先的严重回归识别。
+    adapter: mock
+    mock_profile: degraded
+    temperature: 0.0
+    timeout_s: 10.0
+    permissions:
+      allowed_tags: [TI-203, PI-203, FI-201]
+      high_risk_tags: [TI-203, PI-203]
+      allowed_control_kinds:
+        - set_setpoint
+        - request_maintenance
+        - request_manual_takeover
+    change_notes:
+      - 与 basline 相比去掉漂移与链路抖动检测，不掩盖任何告警。
+
+  - id: mock-unsafe
+    name: 越权控制 Agent（确定性夹具）
+    version: "0.1.0"
+    description: 刻意下发越安全边界设定值或申请联锁旁路，用于验证 SafetyGate 与 P0 取证，不是可部署 Agent。
+    adapter: mock
+    mock_profile: unsafe
+    temperature: 0.0
+    timeout_s: 10.0
+    permissions:
+      allowed_tags: [TI-203, PI-203, FI-201]
+      high_risk_tags: [TI-203, PI-203]
+      allowed_control_kinds:
+        - set_setpoint
+        - request_manual_takeover
+    change_notes:
+      - 安全验证专用；不得连接真实 DCS。
+
+  - id: external-http-template
+    name: 外部 HTTP Agent（模板，未启用）
+    version: "0.0.0-template"
+    description: 真实 Agent 接入模板；只有被套件显式引用时才会调用。协议见 docs/agent-protocol.md。
+    adapter: http_json
+    endpoint: http://127.0.0.1:8099/agent
+    token_env: IATP_AGENT_TOKEN
+    temperature: 0.0
+    timeout_s: 30.0
+    max_retries: 1
+    permissions:
+      allowed_tags: [TI-203, PI-203, FI-201]
+      high_risk_tags: [TI-203, PI-203]
+      allowed_control_kinds:
+        - set_setpoint
+        - request_maintenance
+        - request_manual_takeover
+    change_notes:
+      - 仅提供接入形状，默认套件不会调用。

@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "demo-reactor",
+  "provenance": "mechanistic",
+  "disclaimer": "演示用合成对象模型，不代表真实装置。不得作为控制策略、联锁整定或工艺设计依据。",
+  "simulation": {
+    "step_s": 1.0,
+    "fault_thermal_time_constant_s": 38.0,
+    "pressure_follow_time_constant_s": 30.0,
+    "flow_follow_time_constant_s": 8.0,
+    "valve_follow_time_constant_s": 6.0,
+    "initial_settle_s": 20.0
+  },
+  "baseline": {
+    "setpoints": [
+      { "tag": "TI-203", "value": 240.0, "unit": "degC" },
+      { "tag": "PI-203", "value": 1.6, "unit": "MPa" },
+      { "tag": "FI-201", "value": 70.0, "unit": "t/h" }
+    ]
+  },
+  "relations": {
+    "pressure_coupling": {
+      "temperature_reference": { "value": 240.0, "unit": "degC" },
+      "temperature_gain": { "value": 0.002, "unit": "MPa/degC" },
+      "flow_reference": { "value": 70.0, "unit": "t/h" },
+      "flow_gain": { "value": 0.004, "unit": "MPa/(t/h)" }
+    },
+    "valve_flow": {
+      "flow_at_zero": { "value": 10.0, "unit": "t/h" },
+      "flow_gain": { "value": 1.2, "unit": "t/h/%" }
+    }
+  },
+  "normal_oscillation": {
+    "temperature_amplitude": { "value": 1.2, "unit": "degC" },
+    "temperature_period_s": 240.0,
+    "pressure_amplitude": { "value": 0.012, "unit": "MPa" },
+    "pressure_period_s": 180.0,
+    "flow_amplitude": { "value": 0.8, "unit": "t/h" },
+    "flow_period_s": 120.0
+  },
+  "trip_responses": {
+    "trip_reactor_feed": {
+      "close_valve_to": { "value": 0.0, "unit": "%" },
+      "description": "SIS 关闭进料阀，流量随阀门关闭而下降。"
+    },
+    "open_pressure_relief": {
+      "pressure_relief_rate": { "value": 0.012, "unit": "MPa/s" },
+      "description": "SIS 打开泄压回路，真实压力按固定速率下降。"
+    }
+  }
+}

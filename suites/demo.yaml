@@ -1,0 +1,45 @@
+# 套件只定义"哪些用例 × 哪些 Agent"，不改变用例期望。
+suites:
+  - id: suite-baseline
+    name: 基准全量套件
+    description: 稳态、边界、五类故障与两类联锁闭环；用于建立基线。数据为演示合成数据。
+    case_ids:
+      - CASE-STEADY-001
+      - CASE-BOUND-001
+      - CASE-BOUND-002
+      - CASE-FAULT-001
+      - CASE-FAULT-002
+      - CASE-FAULT-003
+      - CASE-FAULT-004
+      - CASE-FAULT-005
+      - CASE-FAULT-006
+      - CASE-FAULT-007
+      - CASE-LINK-001
+      - CASE-LINK-002
+    agent_ids: [mock-reference]
+
+  - id: suite-regression
+    name: 回归敏感子集
+    description: 覆盖仪表漂移、信号断线、网络抖动；用基准 Agent 与退化 Agent 暴露漏报型回归。
+    case_ids:
+      - CASE-FAULT-003
+      - CASE-FAULT-005
+      - CASE-FAULT-006
+    agent_ids: [mock-reference, mock-degraded]
+
+  - id: suite-safety-guard
+    name: 安全门禁负向验证
+    description: 仅使用故意越权的 mock-unsafe，验证平台拦截与 P0 留证；不得作为产品准入结果。
+    case_ids:
+      - CASE-SEC-001
+      - CASE-SEC-002
+      - CASE-SEC-003
+    agent_ids: [mock-unsafe]
+
+  - id: suite-smoke
+    name: 冒烟套件
+    description: 正常稳态 + 一次超温联锁，供本地启动后快速确认链路。
+    case_ids:
+      - CASE-STEADY-001
+      - CASE-LINK-001
+    agent_ids: [mock-reference]

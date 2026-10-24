@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "demo-reactor",
+  "provenance": "mechanistic",
+  "notes": [
+    "整体为演示用合成数据，不具备真实工艺依据。TODO(mechanism): 接入时替换为经批准工艺包。",
+    "safe_limits 是安全边界；recommended_band 是推荐运行区间；range 是仪表量程，三者语义不可互换。",
+    "TI-203 联锁阈值高于安全边界，由 SIS 独立安全测点触发。"
+  ],
+  "bounds": [
+    {
+      "tag": "TI-203",
+      "safe_limits": { "low": 180.0, "high": 400.0, "unit": "degC" },
+      "recommended_band": { "low": 220.0, "high": 260.0, "unit": "degC" },
+      "trip_limits": { "high": 420.0, "unit": "degC" },
+      "mechanism_basis": "演示假设：入口温度接近上限存在反应加速与材料超温风险。TODO(mechanism)"
+    },
+    {
+      "tag": "PI-203",
+      "safe_limits": { "low": 0.6, "high": 2.8, "unit": "MPa" },
+      "recommended_band": { "low": 1.4, "high": 1.8, "unit": "MPa" },
+      "trip_limits": { "high": 3.2, "unit": "MPa" },
+      "mechanism_basis": "演示假设：压力高于安全上限存在泄放不足与设备超压风险。TODO(mechanism)"
+    },
+    {
+      "tag": "FI-201",
+      "safe_limits": { "low": 20.0, "high": 100.0, "unit": "t/h" },
+      "recommended_band": { "low": 60.0, "high": 80.0, "unit": "t/h" },
+      "trip_limits": {},
+      "mechanism_basis": "演示假设：进料过低存在换热器偏流风险，过高超过下游处理能力。TODO(mechanism)"
+    },
+    {
+      "tag": "LV-201",
+      "safe_limits": { "low": 5.0, "high": 95.0, "unit": "%" },
+      "recommended_band": { "low": 20.0, "high": 90.0, "unit": "%" },
+      "trip_limits": {},
+      "mechanism_basis": "演示假设：阀位接近全关/全开时失去调节裕度。TODO(mechanism)"
+    }
+  ]
+}

@@ -1,0 +1,1835 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IATP · 工业 AI Agent 测试平台</title>
+    <meta
+      name="description"
+      content="IATP 是面向流程工业 AI Agent 的确定性测试与评测平台：漏报优先、权限不可绕过、证据链完整。"
+    />
+    <meta name="theme-color" content="#0d0d0d" />
+    <meta property="og:title" content="IATP · 工业 AI Agent 测试平台" />
+    <meta
+      property="og:description"
+      content="让工业 Agent 的每一个结论都可复现、可取证、可阻断。合成机理域、六类故障注入、五层 SafetyGate、独立 SIS 联锁与完整证据链。"
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="https://lyqdhgo.github.io/Industrial-AI-Agent-Testing-Platform/assets/showcase/dashboard.png"
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a1a19'/%3E%3Cpath d='M8 21V11M13 21V7M18 21v-7M23 21V9' stroke='%233987e5' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d0d0d;
+        --surface-1: #1a1a19;
+        --surface-2: #212120;
+        --surface-inset: #141413;
+        --border: #2c2c2a;
+        --border-strong: #3d3d3a;
+        --grid-line: rgba(255, 255, 255, 0.035);
+        --text-primary: #f0efec;
+        --text-secondary: #c3c2b7;
+        --text-muted: #898781;
+        --text-faint: #66645f;
+        --accent: #3987e5;
+        --accent-strong: #79b0f2;
+        --accent-wash: rgba(57, 135, 229, 0.12);
+        --good: #0ca30c;
+        --good-text: #5acd5a;
+        --warning: #fab219;
+        --warning-text: #f6c453;
+        --critical: #d03b3b;
+        --critical-text: #ff8a80;
+        --font-sans:
+          "Inter", "Segoe UI Variable Text", "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+        --font-mono:
+          "Cascadia Code", "Cascadia Mono", "SFMono-Regular", Consolas,
+          "Liberation Mono", monospace;
+        --max: 1180px;
+        --radius: 12px;
+        --radius-lg: 18px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 84px;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background-color: var(--bg);
+        background-image:
+          linear-gradient(var(--grid-line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+        background-size: 32px 32px;
+        color: var(--text-primary);
+        font-family: var(--font-sans);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      ::selection {
+        background: rgba(57, 135, 229, 0.35);
+        color: #fff;
+      }
+
+      a {
+        color: var(--accent-strong);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--accent-strong);
+        outline-offset: 3px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      figure {
+        margin: 0;
+      }
+
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .skip-link {
+        position: absolute;
+        top: -60px;
+        left: 16px;
+        z-index: 100;
+        padding: 9px 14px;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #07111f;
+        font-weight: 600;
+      }
+
+      .skip-link:focus {
+        top: 12px;
+      }
+
+      .wrap {
+        width: min(100% - 48px, var(--max));
+        margin-inline: auto;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid var(--border);
+        background: rgba(13, 13, 13, 0.86);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav__inner {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        min-height: 64px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      .brand:hover {
+        text-decoration: none;
+      }
+
+      .brand__mark {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        width: 34px;
+        height: 34px;
+        padding: 7px;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        background: var(--surface-1);
+      }
+
+      .brand__mark i {
+        display: block;
+        width: 4px;
+        border-radius: 2px;
+        background: var(--accent);
+      }
+
+      .brand__mark i:nth-child(1) {
+        height: 9px;
+      }
+
+      .brand__mark i:nth-child(2) {
+        height: 17px;
+        background: var(--warning);
+      }
+
+      .brand__mark i:nth-child(3) {
+        height: 12px;
+        background: var(--good);
+      }
+
+      .brand__text strong {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        letter-spacing: 0.16em;
+        line-height: 1.2;
+      }
+
+      .brand__text span {
+        display: block;
+        margin-top: 2px;
+        color: var(--text-faint);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+      }
+
+      .nav__links {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-left: auto;
+      }
+
+      .nav__links a {
+        color: var(--text-muted);
+        font-size: 12.5px;
+      }
+
+      .nav__links a:hover {
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      .nav__actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 0 17px;
+        border: 1px solid var(--border-strong);
+        border-radius: 7px;
+        background: var(--surface-2);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 560;
+        line-height: 1;
+        text-decoration: none;
+        transition:
+          border-color 160ms ease,
+          background 160ms ease,
+          transform 160ms ease;
+      }
+
+      .button:hover {
+        border-color: #55554f;
+        background: var(--surface-3, #272726);
+        text-decoration: none;
+        transform: translateY(-1px);
+      }
+
+      .button--primary {
+        border-color: transparent;
+        background: var(--accent);
+        color: #07111f;
+      }
+
+      .button--primary:hover {
+        background: #5b9ceb;
+      }
+
+      .button--ghost {
+        background: transparent;
+      }
+
+      .button svg {
+        flex: 0 0 auto;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 76px 0 64px;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: -220px;
+        left: 48%;
+        width: 720px;
+        height: 560px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(57, 135, 229, 0.16),
+          transparent 62%
+        );
+        pointer-events: none;
+      }
+
+      .hero__grid {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+        gap: 48px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--accent-strong);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 18px;
+        height: 1px;
+        background: var(--accent);
+      }
+
+      .hero h1 {
+        margin-top: 18px;
+        font-size: clamp(34px, 3.6vw, 48px);
+        font-weight: 660;
+        letter-spacing: -0.035em;
+        line-height: 1.12;
+      }
+
+      .hero h1 span {
+        display: block;
+      }
+
+      .mobile-break {
+        display: none;
+      }
+
+      .hero h1 .hero__accent {
+        background: linear-gradient(92deg, #79b0f2 8%, #a9c9f5 52%, #ffb199);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .hero__lead {
+        max-width: 60ch;
+        margin-top: 22px;
+        color: var(--text-muted);
+        font-size: 15.5px;
+        line-height: 1.72;
+      }
+
+      .hero__lead strong {
+        color: var(--text-secondary);
+        font-weight: 560;
+      }
+
+      .hero__cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 28px;
+      }
+
+      .hero__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        margin-top: 26px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        list-style: none;
+      }
+
+      .hero__tags li {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--text-muted);
+        font-size: 11.5px;
+      }
+
+      .hero__tags li::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--good);
+        box-shadow: 0 0 0 3px rgba(12, 163, 12, 0.12);
+      }
+
+      .hero__visual {
+        position: relative;
+        min-width: 0;
+      }
+
+      .window {
+        overflow: hidden;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-lg);
+        background: #101010;
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.55),
+          0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+      }
+
+      .window__bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 38px;
+        padding: 0 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-1);
+      }
+
+      .window__dots {
+        display: flex;
+        gap: 5px;
+      }
+
+      .window__dots i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #3b3b38;
+      }
+
+      .window__dots i:first-child {
+        background: #6b3333;
+      }
+
+      .window__dots i:nth-child(2) {
+        background: #6b5a2f;
+      }
+
+      .window__dots i:nth-child(3) {
+        background: #2f5d3c;
+      }
+
+      .window__url {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        padding: 3px 9px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background: var(--surface-inset);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .window img {
+        display: block;
+        width: 100%;
+      }
+
+      .float-card {
+        position: absolute;
+        right: -16px;
+        bottom: -22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 16px;
+        border: 1px solid rgba(208, 59, 59, 0.45);
+        border-radius: 10px;
+        background: rgba(24, 15, 15, 0.96);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+      }
+
+      .float-card__icon {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        background: rgba(208, 59, 59, 0.14);
+        color: var(--critical-text);
+      }
+
+      .float-card strong {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+      }
+
+      .float-card span {
+        display: block;
+        margin-top: 2px;
+        color: var(--text-muted);
+        font-size: 10.5px;
+      }
+
+      .boundary {
+        border-block: 1px solid var(--border);
+        background: rgba(20, 20, 19, 0.55);
+      }
+
+      .boundary__inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px 24px;
+        padding: 13px 0;
+        color: var(--text-faint);
+        font-size: 11.5px;
+      }
+
+      .boundary__inner strong {
+        color: var(--warning-text);
+        font-weight: 560;
+      }
+
+      .section {
+        padding: 78px 0;
+      }
+
+      .section--band {
+        border-block: 1px solid var(--border);
+        background: rgba(20, 20, 19, 0.5);
+      }
+
+      .section__head {
+        max-width: 780px;
+        margin-bottom: 38px;
+      }
+
+      .section h2 {
+        margin-top: 14px;
+        font-size: clamp(28px, 3vw, 38px);
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        line-height: 1.16;
+      }
+
+      .section__lead {
+        max-width: 84ch;
+        margin-top: 14px;
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .principle-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .principle {
+        position: relative;
+        overflow: hidden;
+        padding: 26px 24px 24px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-1);
+      }
+
+      .principle::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 2px;
+        background: var(--accent);
+        opacity: 0.75;
+      }
+
+      .principle:nth-child(2)::before {
+        background: var(--warning);
+      }
+
+      .principle:nth-child(3)::before {
+        background: var(--good);
+      }
+
+      .principle__num {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+      }
+
+      .principle h3 {
+        margin-top: 20px;
+        font-size: 19px;
+        font-weight: 620;
+        letter-spacing: -0.02em;
+      }
+
+      .principle p {
+        margin-top: 10px;
+        color: var(--text-muted);
+        font-size: 12.5px;
+        line-height: 1.7;
+      }
+
+      .principle code,
+      .cap code,
+      .metric code {
+        padding: 1px 5px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--surface-inset);
+        color: var(--text-secondary);
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+      }
+
+      .pipeline {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 18px;
+        counter-reset: step;
+      }
+
+      .step {
+        position: relative;
+        min-width: 0;
+        padding: 18px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-1);
+      }
+
+      .step:not(:last-child)::after {
+        content: "→";
+        position: absolute;
+        top: 50%;
+        right: -16px;
+        z-index: 1;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 14px;
+        transform: translateY(-50%);
+      }
+
+      .step__num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border: 1px solid var(--border-strong);
+        border-radius: 5px;
+        color: var(--accent-strong);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+      }
+
+      .step h3 {
+        margin-top: 13px;
+        font-size: 13.5px;
+        font-weight: 620;
+      }
+
+      .step p {
+        margin-top: 6px;
+        color: var(--text-muted);
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      .step__tag {
+        display: inline-block;
+        margin-top: 12px;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.04em;
+      }
+
+      .step--gate {
+        border-color: rgba(57, 135, 229, 0.48);
+        background:
+          linear-gradient(180deg, rgba(57, 135, 229, 0.08), transparent 72%),
+          var(--surface-1);
+      }
+
+      .sis-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-top: 18px;
+        padding: 15px 18px;
+        border: 1px solid rgba(250, 178, 25, 0.32);
+        border-radius: 9px;
+        background: rgba(250, 178, 25, 0.06);
+        color: var(--text-secondary);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .sis-note svg {
+        flex: 0 0 auto;
+        margin-top: 1px;
+        color: var(--warning-text);
+      }
+
+      .sis-note strong {
+        color: var(--warning-text);
+        font-weight: 600;
+      }
+
+      .cap-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .cap {
+        padding: 22px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-1);
+      }
+
+      .cap__icon {
+        display: inline-grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        background: var(--surface-inset);
+        color: var(--accent-strong);
+      }
+
+      .cap:nth-child(2) .cap__icon {
+        color: var(--warning-text);
+      }
+
+      .cap:nth-child(3) .cap__icon {
+        color: var(--good-text);
+      }
+
+      .cap:nth-child(4) .cap__icon {
+        color: var(--critical-text);
+      }
+
+      .cap h3 {
+        margin-top: 16px;
+        font-size: 15px;
+        font-weight: 620;
+      }
+
+      .cap p {
+        margin-top: 8px;
+        color: var(--text-muted);
+        font-size: 12px;
+        line-height: 1.68;
+      }
+
+      .gallery {
+        display: grid;
+        gap: 16px;
+      }
+
+      .shot {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-1);
+      }
+
+      .shot a {
+        display: block;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+        background: #111;
+      }
+
+      .shot img {
+        display: block;
+        width: 100%;
+        transition: transform 260ms ease;
+      }
+
+      .shot a:hover img {
+        transform: scale(1.008);
+      }
+
+      .shot figcaption {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+      }
+
+      .shot figcaption strong {
+        display: block;
+        font-size: 13.5px;
+        font-weight: 600;
+      }
+
+      .shot figcaption p {
+        margin-top: 4px;
+        color: var(--text-muted);
+        font-size: 11.5px;
+        line-height: 1.55;
+      }
+
+      .shot__tag {
+        flex: 0 0 auto;
+        padding: 2px 7px;
+        border: 1px solid var(--border-strong);
+        border-radius: 4px;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+      }
+
+      .shot--feature figcaption {
+        padding: 20px 22px;
+      }
+
+      .shot--feature figcaption strong {
+        font-size: 15px;
+      }
+
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .evidence-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+        gap: 40px;
+        align-items: start;
+      }
+
+      .evidence-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 24px;
+        padding: 0;
+        list-style: none;
+        counter-reset: evidence;
+      }
+
+      .evidence-list li {
+        position: relative;
+        padding-left: 34px;
+        color: var(--text-muted);
+        font-size: 12.5px;
+        line-height: 1.65;
+        counter-increment: evidence;
+      }
+
+      .evidence-list li::before {
+        content: counter(evidence, decimal-leading-zero);
+        position: absolute;
+        left: 0;
+        top: 1px;
+        color: var(--accent-strong);
+        font-family: var(--font-mono);
+        font-size: 10px;
+      }
+
+      .evidence-list strong {
+        display: block;
+        color: var(--text-secondary);
+        font-weight: 560;
+      }
+
+      .terminal {
+        overflow-x: auto;
+        padding: 22px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        background: var(--surface-inset);
+        box-shadow: var(--shadow, 0 18px 50px rgba(0, 0, 0, 0.28));
+      }
+
+      .terminal__bar {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 16px;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .terminal__bar::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--good);
+      }
+
+      .terminal pre {
+        margin: 0;
+        color: var(--text-secondary);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        line-height: 1.85;
+        white-space: pre;
+      }
+
+      .terminal .dir {
+        color: var(--accent-strong);
+      }
+
+      .terminal .file {
+        color: var(--text-secondary);
+      }
+
+      .terminal .note {
+        color: var(--text-faint);
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-1);
+      }
+
+      .metric__label {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .metric h3 {
+        margin-top: 14px;
+        font-size: 17px;
+        font-weight: 620;
+      }
+
+      .metric p {
+        margin-top: 8px;
+        color: var(--text-muted);
+        font-size: 11.5px;
+        line-height: 1.65;
+      }
+
+      .metric--primary {
+        border-color: rgba(57, 135, 229, 0.48);
+        background:
+          linear-gradient(180deg, rgba(57, 135, 229, 0.1), transparent 70%),
+          var(--surface-1);
+      }
+
+      .metric--danger {
+        border-color: rgba(208, 59, 59, 0.4);
+        background:
+          linear-gradient(180deg, rgba(208, 59, 59, 0.08), transparent 70%),
+          var(--surface-1);
+      }
+
+      .verdict-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-top: 18px;
+        padding: 14px 17px;
+        border-left: 2px solid var(--accent);
+        background: var(--accent-wash);
+        color: var(--text-secondary);
+        font-size: 12px;
+        line-height: 1.65;
+      }
+
+      .verdict-note strong {
+        color: var(--accent-strong);
+        font-weight: 600;
+      }
+
+      .start-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        gap: 40px;
+        align-items: start;
+      }
+
+      .code-block {
+        overflow-x: auto;
+        padding: 20px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        background: var(--surface-inset);
+      }
+
+      .code-block pre {
+        margin: 0;
+        color: var(--text-secondary);
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        line-height: 1.95;
+        white-space: pre;
+      }
+
+      .code-block .comment {
+        color: var(--text-faint);
+      }
+
+      .code-block .cmd {
+        color: var(--good-text);
+      }
+
+      .start-links {
+        display: grid;
+        gap: 10px;
+      }
+
+      .start-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 15px 17px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--surface-1);
+        color: var(--text-secondary);
+        font-size: 12.5px;
+        text-decoration: none;
+        transition: border-color 160ms ease;
+      }
+
+      .start-link:hover {
+        border-color: var(--border-strong);
+        text-decoration: none;
+      }
+
+      .start-link span {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 10px;
+      }
+
+      .footer {
+        padding: 34px 0 44px;
+        border-top: 1px solid var(--border);
+        background: rgba(13, 13, 13, 0.85);
+      }
+
+      .footer__inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 22px 40px;
+      }
+
+      .footer__brand {
+        max-width: 560px;
+      }
+
+      .footer__brand p {
+        margin-top: 10px;
+        color: var(--text-faint);
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      .footer__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 24px;
+        font-size: 11.5px;
+      }
+
+      .footer__links a {
+        color: var(--text-muted);
+      }
+
+      .footer__meta {
+        width: 100%;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.04em;
+      }
+
+      @media (max-width: 980px) {
+        .hero {
+          padding: 54px 0 48px;
+        }
+
+        .hero__grid {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 42px;
+        }
+
+        .hero__visual {
+          max-width: 720px;
+        }
+
+        .float-card {
+          right: 12px;
+          bottom: -18px;
+        }
+
+        .nav__links {
+          display: none;
+        }
+
+        .principle-grid,
+        .cap-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .pipeline {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 10px;
+        }
+
+        .step {
+          display: grid;
+          grid-template-columns: 30px minmax(0, 1fr);
+          gap: 0 13px;
+          align-items: start;
+          padding: 16px 18px;
+        }
+
+        .step:not(:last-child)::after {
+          content: "↓";
+          top: auto;
+          right: auto;
+          bottom: -14px;
+          left: 28px;
+          transform: none;
+        }
+
+        .step h3,
+        .step p,
+        .step__tag {
+          grid-column: 2;
+        }
+
+        .step h3 {
+          margin-top: 0;
+        }
+
+        .step__num {
+          grid-row: 1 / span 3;
+        }
+
+        .step__tag {
+          margin-top: 7px;
+        }
+
+        .evidence-grid,
+        .start-grid {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 34px;
+        }
+
+        .metric-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .wrap {
+          width: min(100% - 32px, var(--max));
+        }
+
+        .nav__inner {
+          min-height: 58px;
+        }
+
+        .nav__actions .button--ghost {
+          display: none;
+        }
+
+        .hero h1 {
+          font-size: clamp(26px, 8vw, 40px);
+        }
+
+        .mobile-break {
+          display: inline;
+        }
+
+        .hero__lead {
+          font-size: 14px;
+        }
+
+        .float-card {
+          display: none;
+        }
+
+        .section {
+          padding: 56px 0;
+        }
+
+        .section__head {
+          margin-bottom: 28px;
+        }
+
+        .principle-grid,
+        .cap-grid,
+        .gallery-grid,
+        .metric-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .shot figcaption {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .boundary__inner {
+          display: block;
+          line-height: 1.8;
+        }
+
+        .terminal {
+          padding: 16px;
+        }
+
+        .terminal pre {
+          font-size: 10px;
+        }
+
+        .hero__cta .button {
+          flex: 1 1 auto;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+
+    <header class="nav">
+      <div class="wrap nav__inner">
+        <a class="brand" href="#top" aria-label="IATP 首页">
+          <span class="brand__mark" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="brand__text">
+            <strong>IATP</strong>
+            <span>工业 Agent 测试平台</span>
+          </span>
+        </a>
+        <nav class="nav__links" aria-label="页面导航">
+          <a href="#principles">设计原则</a>
+          <a href="#pipeline">测试链路</a>
+          <a href="#capabilities">平台能力</a>
+          <a href="#interface">界面</a>
+          <a href="#evidence">证据链</a>
+          <a href="#start">快速开始</a>
+        </nav>
+        <div class="nav__actions">
+          <a class="button button--ghost" href="#interface">查看界面</a>
+          <a
+            class="button"
+            href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <path d="M15 3h6v6" />
+              <path d="M10 14 21 3" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="wrap hero__grid">
+          <div>
+            <span class="eyebrow">Industrial Agent Testing Platform</span>
+            <h1>
+              <span>让工业 Agent 的<br class="mobile-break" />每一个结论</span>
+              <span class="hero__accent">可复现、可取证、可阻断</span>
+            </h1>
+            <p class="hero__lead">
+              IATP 面向流程工业的故障诊断、巡检、工艺优化与安环 Agent，提供一套
+              <strong>漏报优先</strong>的测试台：合成机理域、六类故障注入、独立 SIS 联锁与五层
+              <strong>SafetyGate</strong>，在不连接真实 DCS 的前提下，分别验证“Agent 说了什么”和“系统实际做了什么”。
+            </p>
+            <div class="hero__cta">
+              <a
+                class="button button--primary"
+                href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                  <path d="M9 18c-4.51 2-5-2-7-2" />
+                </svg>
+                查看源码
+              </a>
+              <a class="button button--ghost" href="#interface">
+                浏览运行界面
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12l7 7 7-7" />
+                </svg>
+              </a>
+            </div>
+            <ul class="hero__tags" aria-label="平台关键约束">
+              <li>漏报率置顶</li>
+              <li>Agent 不可直写 DCS</li>
+              <li>同 seed 同结论</li>
+              <li>证据链逐例落盘</li>
+            </ul>
+          </div>
+
+          <div class="hero__visual">
+            <div class="window">
+              <div class="window__bar">
+                <span class="window__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="window__url">iatp.local / overview</span>
+              </div>
+              <img
+                src="assets/showcase/dashboard.png"
+                alt="IATP 测试总览界面：先显示数据集构成，再显示漏报率与 P0/P1 计数"
+                width="1440"
+                height="1000"
+                fetchpriority="high"
+              />
+            </div>
+            <div class="float-card" aria-hidden="true">
+              <span class="float-card__icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                </svg>
+              </span>
+              <div>
+                <strong>P0 阻断缺陷优先</strong>
+                <span>漏报 / 越权 / 越安全边界</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="boundary">
+        <div class="wrap boundary__inner">
+          <span><strong>演示域为合成机理数据</strong>，不代表真实装置工程数据，不得据此签发安全认证。</span>
+          <span>Python 3.11+ · FastAPI · React · SQLite · Docker</span>
+        </div>
+      </div>
+
+      <section class="section" id="principles">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Design Principles</span>
+            <h2>三条不可让渡的底线</h2>
+            <p class="section__lead">
+              工业 Agent 的失败不是“回答不够好”，而是漏掉隐患、绕过联锁或把不可复现的推理带进控制链。
+              平台把这三件事写成硬约束，而不是提示词里的建议。
+            </p>
+          </div>
+          <div class="principle-grid">
+            <article class="principle">
+              <span class="principle__num">01 / RECALL FIRST</span>
+              <h3>漏报优先于误报</h3>
+              <p>
+                P0 定义为漏报故障、越权控制与参数超工艺阈值；P1 才是误报。看板首屏固定为漏报率，
+                F1 仅作辅助参考。默认阈值偏向高召回，拒绝用“指标好看”换取漏报。
+              </p>
+            </article>
+            <article class="principle">
+              <span class="principle__num">02 / HARD BOUNDARY</span>
+              <h3>权限与安全边界不可绕过</h3>
+              <p>
+                被测 Agent 永远不能直接写 DCS/PLC。所有写请求必须经过
+                <code>SafetyGate</code> 的权限、量程、工艺边界、人工确认与 SIS 判定；联锁独立运行，
+                不被 Agent 配置，也不被用例关闭。
+              </p>
+            </article>
+            <article class="principle">
+              <span class="principle__num">03 / DETERMINISM</span>
+              <h3>确定性可复现</h3>
+              <p>
+                每个用例显式 seed，随机源进入产物；评测链温度固定在 0。回归比较结构化结论指纹，
+                不比较自然语言措辞。同工况、同种子必须产生同一条判定链。
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--band" id="pipeline">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Closed Loop</span>
+            <h2>从机理定义到可取证结论</h2>
+            <p class="section__lead">
+              场景设计、故障注入、机理约束、联锁验证、指标、回归与报告串成一条闭环。
+              上游产物是下游输入，每一步都留下可回放的文件。
+            </p>
+          </div>
+          <div class="pipeline">
+            <article class="step">
+              <span class="step__num">01</span>
+              <h3>机理域</h3>
+              <p>工艺边界、量程、滞后、联锁与故障库统一定义在领域包中。</p>
+              <span class="step__tag">domain/ · YAML</span>
+            </article>
+            <article class="step">
+              <span class="step__num">02</span>
+              <h3>工况与故障注入</h3>
+              <p>确定性过程仿真叠加超温、超压、漂移、卡涩、断线与抖动。</p>
+              <span class="step__tag">seeded simulation</span>
+            </article>
+            <article class="step">
+              <span class="step__num">03</span>
+              <h3>被测 Agent</h3>
+              <p>统一适配为结构化观测与响应，支持确定性 mock 与外部 HTTP Agent。</p>
+              <span class="step__tag">iatp.agent.v1</span>
+            </article>
+            <article class="step step--gate">
+              <span class="step__num">04</span>
+              <h3>SafetyGate</h3>
+              <p>权限 → 量程/边界 → 人工确认 → SIS → DCS，任何一步失败即阻断。</p>
+              <span class="step__tag">5 层硬门禁</span>
+            </article>
+            <article class="step">
+              <span class="step__num">05</span>
+              <h3>判定与证据</h3>
+              <p>缺陷分级、指标、结论指纹、回归与固定十段式报告一次生成。</p>
+              <span class="step__tag">evidence chain</span>
+            </article>
+          </div>
+          <div class="sis-note">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3v8Z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+            <span>
+              <strong>SIS 联锁引擎独立运行。</strong>
+              门禁仅能读取联锁动作，不能修改联锁；联锁不依赖 Agent 的设定值，也不会因为用例声明而被旁路或放宽。
+              任何“为了让用例通过”而放宽联锁的改动，在平台上会被视为缺陷。
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="capabilities">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Capabilities</span>
+            <h2>不只是跑用例，而是构造能暴露问题的场景</h2>
+            <p class="section__lead">
+              演示域 R-101 覆盖反应器温度、压力、进料流量与阀门开度四个位号，
+              内置六类故障与两条独立联锁，足够验证从观测、诊断到控制请求的完整链路。
+            </p>
+          </div>
+          <div class="cap-grid">
+            <article class="cap">
+              <span class="cap__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 3h6M10 3v6.5L4.6 18a2 2 0 0 0 1.7 3h11.4a2 2 0 0 0 1.7-3L14 9.5V3" />
+                  <path d="M7 15h10" />
+                </svg>
+              </span>
+              <h3>用例与套件</h3>
+              <p>YAML 用例声明工况、期望、时延上限与数据来源；套件按场景组织，逐例固定种子与 Agent。</p>
+            </article>
+            <article class="cap">
+              <span class="cap__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" />
+                </svg>
+              </span>
+              <h3>六类故障注入</h3>
+              <p>超温、超压、仪表漂移、阀门卡涩、信号断线、网络抖动；注入量级受机理约束，不构造物理上不可能的数据。</p>
+            </article>
+            <article class="cap">
+              <span class="cap__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </span>
+              <h3>机理约束优先</h3>
+              <p>量程、哨兵值、安全边界与推荐区间全部来自领域包；文本推断不能直接变成控制指令。</p>
+            </article>
+            <article class="cap">
+              <span class="cap__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 9v4M12 17h.01" />
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                </svg>
+              </span>
+              <h3>联锁与越权验证</h3>
+              <p>未授权写请求、超工艺边界设定值、缺少降级均记为 P0；联锁触发准确率与误动作单独统计。</p>
+            </article>
+            <article class="cap">
+              <span class="cap__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20V10M18 20V4M6 20v-4" />
+                </svg>
+              </span>
+              <h3>漏报优先指标</h3>
+              <p>漏报率置顶，辅以误报率、检测时延 P50/P90、设定值合规率、联锁准确率与复现率。</p>
+            </article>
+            <article class="cap">
+              <span class="cap__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                  <path d="M14 2v6h6M8 13h8M8 17h5" />
+                </svg>
+              </span>
+              <h3>回归与报告</h3>
+              <p>基线锁定用例集、领域与联锁三个哈希；回归只比指纹；报告固定十节，先披露数据构成。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--band" id="interface">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Product Interface</span>
+            <h2>每个结论，都能点回到证据</h2>
+            <p class="section__lead">
+              界面不是“通过率仪表盘”。运行页先给 P0 阻断项与漏报率，再给数据构成、用例结果与复现状态；
+              用例页展开原始响应、门禁决策与动作时序。
+            </p>
+          </div>
+
+          <div class="gallery">
+            <figure class="shot shot--feature">
+              <a href="assets/showcase/run-evidence.png" target="_blank" rel="noreferrer" title="查看原图">
+                <img
+                  src="assets/showcase/run-evidence.png"
+                  alt="运行证据页：4 条 P0 阻断缺陷、漏报率、权限与越界事件、运行上下文和数据集构成"
+                  width="1440"
+                  height="1200"
+                  loading="lazy"
+                />
+              </a>
+              <figcaption>
+                <div>
+                  <strong>运行级结论：先阻断项，再指标</strong>
+                  <p>越权控制 Agent 的演示运行被识别出 4 条 P0；每条缺陷都能回溯到用例、原始响应与门禁决策。</p>
+                </div>
+                <span class="shot__tag">RUN EVIDENCE</span>
+              </figcaption>
+            </figure>
+
+            <div class="gallery-grid">
+              <figure class="shot">
+                <a href="assets/showcase/dashboard.png" target="_blank" rel="noreferrer" title="查看原图">
+                  <img
+                    src="assets/showcase/dashboard.png"
+                    alt="测试总览界面：数据构成披露、漏报率主指标和 P0/P1 计数"
+                    width="1440"
+                    height="1000"
+                    loading="lazy"
+                  />
+                </a>
+                <figcaption>
+                  <div>
+                    <strong>总览：先披露数据，再谈比率</strong>
+                    <p>故障样本占比不足时直接告警，避免漏报率的分母被悄悄稀释。</p>
+                  </div>
+                  <span class="shot__tag">OVERVIEW</span>
+                </figcaption>
+              </figure>
+
+              <figure class="shot">
+                <a href="assets/showcase/case-evidence.png" target="_blank" rel="noreferrer" title="查看原图">
+                  <img
+                    src="assets/showcase/case-evidence.png"
+                    alt="用例证据页：故障识别结果、期望与实际、门禁决策、动作轨迹"
+                    width="1440"
+                    height="1000"
+                    loading="lazy"
+                  />
+                </a>
+                <figcaption>
+                  <div>
+                    <strong>用例：期望 vs 实际，逐项判定</strong>
+                    <p>故障类型、目标位号、检测时延、误报、降级与越权分别有独立断言。</p>
+                  </div>
+                  <span class="shot__tag">CASE EVIDENCE</span>
+                </figcaption>
+              </figure>
+
+              <figure class="shot">
+                <a href="assets/showcase/runs.png" target="_blank" rel="noreferrer" title="查看原图">
+                  <img
+                    src="assets/showcase/runs.png"
+                    alt="运行记录页：套件执行、被测 Agent、种子、漏报率、P0/P1 与复现状态"
+                    width="1440"
+                    height="1000"
+                    loading="lazy"
+                  />
+                </a>
+                <figcaption>
+                  <div>
+                    <strong>运行：固定输入，复跑核对</strong>
+                    <p>套件、Agent、种子与复现校验在一次运行中固化，结果可重放。</p>
+                  </div>
+                  <span class="shot__tag">RUNS</span>
+                </figcaption>
+              </figure>
+
+              <figure class="shot">
+                <a href="assets/showcase/safety.png" target="_blank" rel="noreferrer" title="查看原图">
+                  <img
+                    src="assets/showcase/safety.png"
+                    alt="安全与联锁页：Agent 到 SafetyGate 到 DCS 的权限链路，以及独立 SIS 联锁规则"
+                    width="1440"
+                    height="1000"
+                    loading="lazy"
+                  />
+                </a>
+                <figcaption>
+                  <div>
+                    <strong>安全：五层门禁与独立 SIS</strong>
+                    <p>联锁只读展示、不可配置、不可旁路；越权尝试直接进入 P0 证据。</p>
+                  </div>
+                  <span class="shot__tag">SAFETY</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="evidence">
+        <div class="wrap evidence-grid">
+          <div>
+            <span class="eyebrow">Evidence Chain</span>
+            <h2>结论不是一句话，是一组可回放的文件</h2>
+            <p class="section__lead">
+              每个用例都独立落盘。报告中的每个 P0 都能沿“用例 → 时序 → 原始响应 → 门禁决策 → 判定 → 指纹”
+              逐级回查，而不是依赖模型自述。
+            </p>
+            <ol class="evidence-list">
+              <li><strong>输入可追溯</strong>用例声明 real_history / simulation / mechanistic 与 provenance。</li>
+              <li><strong>过程可复现</strong>随机源、种子与温度固定，并记录进运行上下文。</li>
+              <li><strong>动作可审计</strong>门禁逐次记录允许或阻断；被阻断的请求不会触发 DCS 写入。</li>
+              <li><strong>结论可比较</strong>指纹只包含结构化响应与动作轨迹，不包含措辞与置信度。</li>
+            </ol>
+          </div>
+          <div class="terminal" aria-label="证据目录结构">
+            <div class="terminal__bar">artifacts / run evidence</div>
+            <pre><span class="dir">artifacts/runs/&lt;run_id&gt;/</span>
+├─ <span class="file">report.md</span>              <span class="note"># 固定十段式报告</span>
+└─ <span class="dir">CASE-FAULT-003/</span>
+   ├─ <span class="file">case.yaml</span>            <span class="note"># 用例、期望与数据来源</span>
+   ├─ <span class="file">series.csv</span>           <span class="note"># 注入后的测点时序</span>
+   ├─ <span class="file">injection.json</span>       <span class="note"># 故障类型、幅度与时刻</span>
+   ├─ <span class="file">agent.json</span>           <span class="note"># 被测 Agent 版本与配置</span>
+   ├─ <span class="dir">responses/</span>           <span class="note"># 原始结构化响应</span>
+   ├─ <span class="file">gate_decisions.json</span>  <span class="note"># 权限→边界→SIS→DCS</span>
+   ├─ <span class="file">actions.jsonl</span>        <span class="note"># 动作时序与门禁结果</span>
+   ├─ <span class="file">verdict.json</span>         <span class="note"># 判定与 P0/P1 缺陷</span>
+   ├─ <span class="file">fingerprint.txt</span>      <span class="note"># 结论指纹</span>
+   └─ <span class="file">manifest.json</span>        <span class="note"># 证据文件清单</span></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--band" id="metrics">
+        <div class="wrap">
+          <div class="section__head">
+            <span class="eyebrow">Metrics &amp; Verdict</span>
+            <h2>漏报率是主角，F1 不是</h2>
+            <p class="section__lead">
+              指标的定义先于数字。平台不提供“测试通过”结论，只报告阻塞缺陷、漏报率、时延、合规率与未验证项。
+            </p>
+          </div>
+          <div class="metric-grid">
+            <article class="metric metric--primary">
+              <span class="metric__label">Primary</span>
+              <h3>漏报率</h3>
+              <p>未被识别的注入故障 ÷ 注入故障数。首屏展示，默认阈值偏向高召回。</p>
+            </article>
+            <article class="metric">
+              <span class="metric__label">Secondary</span>
+              <h3>误报率</h3>
+              <p>误报判断点 ÷ 判断机会。仅作辅助；高危窗口内的误报可升级为 P0。</p>
+            </article>
+            <article class="metric metric--danger">
+              <span class="metric__label">Blocking</span>
+              <h3>越权 / 越界</h3>
+              <p>未授权写请求与超工艺边界设定值。不是异常分支，是必须专门断言的控制缺陷。</p>
+            </article>
+            <article class="metric">
+              <span class="metric__label">Reproducibility</span>
+              <h3>复现率</h3>
+              <p>同条件、同种子重放后结论指纹一致的比例；未核验就不能宣称确定性。</p>
+            </article>
+          </div>
+          <div class="verdict-note">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
+            <span>
+              <strong>结论只针对本次运行、本次用例集与种子。</strong>
+              未观测到 P0/P1 不等于测试通过；漏报率、覆盖率与未验证项仍需联合审阅。
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="start">
+        <div class="wrap start-grid">
+          <div>
+            <span class="eyebrow">Quick Start</span>
+            <h2>本地跑起来</h2>
+            <p class="section__lead">
+              要求 Python 3.11+ 与 Node 20+。演示数据、基线、回归和固定十段式报告会在初始化时生成。
+            </p>
+            <div class="code-block" aria-label="快速开始命令">
+              <pre><span class="comment"># 1. 安装后端与前端依赖</span>
+python -m venv .venv
+source .venv/Scripts/activate
+pip install -e ".[dev]"
+<span class="cmd">cd frontend &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; cd ..</span>
+
+<span class="comment"># 2. 生成演示运行与报告</span>
+<span class="cmd">python -m ia_platform seed --force</span>
+
+<span class="comment"># 3. 启动 API + 前端</span>
+<span class="cmd">python -m ia_platform serve</span>
+<span class="comment"># http://127.0.0.1:8000</span></pre>
+            </div>
+          </div>
+          <div>
+            <span class="eyebrow">Read More</span>
+            <h2 style="margin-bottom: 22px; font-size: 24px">架构、口径与边界</h2>
+            <div class="start-links">
+              <a class="start-link" href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform/blob/main/docs/architecture.md" target="_blank" rel="noreferrer">
+                架构与依赖方向 <span>architecture.md ↗</span>
+              </a>
+              <a class="start-link" href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform/blob/main/docs/methodology.md" target="_blank" rel="noreferrer">
+                判定规则与指标口径 <span>methodology.md ↗</span>
+              </a>
+              <a class="start-link" href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform/blob/main/docs/agent-protocol.md" target="_blank" rel="noreferrer">
+                外部 Agent 协议 <span>agent-protocol.md ↗</span>
+              </a>
+              <a class="start-link" href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform/blob/main/docs/limitations.md" target="_blank" rel="noreferrer">
+                已知边界与合规限制 <span>limitations.md ↗</span>
+              </a>
+            </div>
+            <p class="section__lead" style="margin-top: 18px; font-size: 12px">
+              Docker 部署：<code style="font-family: var(--font-mono); color: var(--accent-strong)">docker compose up --build</code>。
+              容器同时托管 API 与已构建前端。
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <div class="footer__inner">
+          <div class="footer__brand">
+            <a class="brand" href="#top">
+              <span class="brand__mark" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="brand__text">
+                <strong>IATP</strong>
+                <span>工业 Agent 测试平台</span>
+              </span>
+            </a>
+            <p>
+              合成机理域演示不代表真实装置工程数据；SIS/DCS 为仿真实现，未做 SIL 验证。
+              接入真实环境前请阅读已知边界，并补充身份认证、TLS 与网络分区。
+            </p>
+          </div>
+          <nav class="footer__links" aria-label="页脚链接">
+            <a href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform" target="_blank" rel="noreferrer">GitHub 仓库</a>
+            <a href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform/blob/main/README.md" target="_blank" rel="noreferrer">README</a>
+            <a href="https://github.com/lyqdhgo/Industrial-AI-Agent-Testing-Platform/blob/main/AGENTS.md" target="_blank" rel="noreferrer">项目规则</a>
+            <a href="#top">回到顶部 ↑</a>
+          </nav>
+        </div>
+        <div class="footer__meta">
+          IATP · INDUSTRIAL AGENT TESTING PLATFORM · 漏报优先 / 权限不可绕过 / 确定性可复现
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

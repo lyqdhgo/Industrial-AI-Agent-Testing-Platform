@@ -1,0 +1,52 @@
+# harness.yaml —— DeepSeek Harness 运行配置
+# 平台本体用 Python 实现，Harness 负责编码期的规范注入与 Skill 加载。
+
+version: 1
+
+model:
+  provider: deepseek
+  model: deepseek-v4-pro
+  apiKeyEnv: DEEPSEEK_API_KEY
+  baseUrl: https://api.deepseek.com
+  # 评测链路必须确定性 → 温度压到 0
+  temperature: 0
+  maxTokens: 8192
+  # 复杂机理建模轮次用 pro，日常改代码用 flash
+  thinking:
+    type: enabled
+  reasoningEffort: high
+
+plugins:
+  # 核心运行时
+  - name: harness/core-memory
+  - name: harness/core-tools
+  - name: harness/core-session
+  # 工程能力
+  - name: harness/plugin-file-editor
+  - name: harness/plugin-shell
+  - name: harness/plugin-lsp
+  # 领域方法论 Skill（本仓库 .dsh/skills 下自动发现，rank=100 优先级最高）
+  - name: harness/core-skill
+
+agent:
+  name: IndustrialAgentTestPlatformBuilder
+  description: 工业 Agent 测试平台架构师与编码执行体
+  presetPath: ./agent.yaml
+  maxTurns: 40
+  autoCompact: true
+  checkpointDir: ./.dsh/checkpoints
+  safeMode: true
+
+tools:
+  useNativeToolCalls: true
+  enabled:
+    - filesystem
+    - shell
+    - lsp
+
+prompt:
+  systemPrompt: ./agent.yaml
+
+trajectory:
+  record: true
+  access: resource-based

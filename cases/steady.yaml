@@ -1,0 +1,23 @@
+# 稳态用例：用于测误报，不作"通过率"分母的主要来源。
+cases:
+  - id: CASE-STEADY-001
+    name: 正常负荷稳态
+    description: 入口温度、压力、流量位于推荐区间，验证 Agent 不产生无根据告警或控制建议。
+    category: steady
+    source: simulation
+    provenance: demo_reactor 合成工况，参数来自 domain/demo_reactor 演示假设，非真实装置数据
+    seed: 20260101
+    duration_s: 240
+    decision_interval_s: 15
+    history_window_s: 180
+    timeline:
+      - {start_s: 0, duration_s: 240, state: steady}
+    initial_conditions:
+      - {tag: TI-203, value: 240.0, unit: degC}
+      - {tag: PI-203, value: 1.6, unit: MPa}
+      - {tag: FI-201, value: 70.0, unit: t/h}
+    expected:
+      should_detect: false
+      max_false_alarms: 0
+      expect_attention: false
+    tags: [steady, false-alarm]

@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "demo-reactor",
+  "asset_id": "R-101",
+  "asset_name": "反应器进料预热与压力保护单元（演示装置）",
+  "disclaimer": "本数据包为软件演示用合成工艺，所有阈值、动态参数与联锁值均为演示假设，不具有真实装置工艺包依据。接入生产前必须由工艺与安全工程师按 P&ID、SIS 因果表、工艺包替换，并完成 HAZOP/LOPA 复核。",
+  "timebase": {
+    "simulation_step_s": 1.0,
+    "decision_interval_s": 15.0,
+    "history_window_s": 180.0
+  },
+  "sensors": [
+    {
+      "tag": "TI-203",
+      "name": "反应器入口温度",
+      "kind": "temperature",
+      "unit": "degC",
+      "range": { "low": -20.0, "high": 500.0, "unit": "degC" },
+      "sample_interval_s": 2.0,
+      "dynamics": { "kind": "first_order_lag", "time_constant_s": 45.0, "dead_time_s": 12.0 },
+      "noise": { "kind": "gaussian", "sigma": 0.35, "unit": "degC" }
+    },
+    {
+      "tag": "PI-203",
+      "name": "反应器压力",
+      "kind": "pressure",
+      "unit": "MPa",
+      "range": { "low": 0.0, "high": 4.5, "unit": "MPa" },
+      "sample_interval_s": 2.0,
+      "dynamics": { "kind": "first_order_lag", "time_constant_s": 30.0, "dead_time_s": 6.0 },
+      "noise": { "kind": "gaussian", "sigma": 0.012, "unit": "MPa" }
+    },
+    {
+      "tag": "FI-201",
+      "name": "反应器进料流量",
+      "kind": "flow",
+      "unit": "t/h",
+      "range": { "low": 0.0, "high": 120.0, "unit": "t/h" },
+      "sample_interval_s": 1.0,
+      "dynamics": { "kind": "first_order_lag", "time_constant_s": 8.0, "dead_time_s": 2.0 },
+      "noise": { "kind": "gaussian", "sigma": 0.25, "unit": "t/h" }
+    },
+    {
+      "tag": "LV-201",
+      "name": "进料调节阀阀位",
+      "kind": "valve_position",
+      "unit": "%",
+      "range": { "low": 0.0, "high": 100.0, "unit": "%" },
+      "sample_interval_s": 1.0,
+      "dynamics": { "kind": "first_order_lag", "time_constant_s": 6.0, "dead_time_s": 1.0 },
+      "noise": { "kind": "gaussian", "sigma": 0.15, "unit": "%" }
+    }
+  ]
+}

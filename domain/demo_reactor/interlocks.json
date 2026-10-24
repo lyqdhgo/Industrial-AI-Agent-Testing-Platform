@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "demo-reactor",
+  "source": "platform_owned",
+  "notes": [
+    "联锁表是测试平台自有资产，不读取被测 Agent 或被测系统的配置。",
+    "bypassable 恒为 false，属于断言而非可配置开关。",
+    "演示联锁值来自 process_bounds.json，接入生产前必须替换为经批准的 SIS 因果表。"
+  ],
+  "rules": [
+    {
+      "id": "IL-TI203-HIHI",
+      "tag": "TI-203",
+      "name": "反应器入口超高温联锁",
+      "condition": "measured >= trip_limit.high",
+      "trip_limit": { "high": 420.0, "unit": "degC" },
+      "action": "trip_reactor_feed",
+      "layer": "sis",
+      "bypassable": false,
+      "note": "硬件级跳车：关闭进料阀并切除加热。"
+    },
+    {
+      "id": "IL-PI203-HIHI",
+      "tag": "PI-203",
+      "name": "反应器超高压联锁",
+      "condition": "measured >= trip_limit.high",
+      "trip_limit": { "high": 3.2, "unit": "MPa" },
+      "action": "open_pressure_relief",
+      "layer": "sis",
+      "bypassable": false,
+      "note": "硬件级泄压联锁：打开泄压阀并切断进料。"
+    }
+  ]
+}
